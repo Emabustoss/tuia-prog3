@@ -7,23 +7,39 @@ from ..models.node import Node
 class BreadthFirstSearch:
     @staticmethod
     def search(grid: Grid) -> Solution:
-        """Find path between two points in a grid using Breadth First Search
-
-        Args:
-            grid (Grid): Grid of points
-
-        Returns:
-            Solution: Solution found
-        """
-        # Initialize root node
         root = Node("", state=grid.initial, cost=0, parent=None, action=None)
 
-        # Initialize reached with the initial state
         reached = {}
+        frontera = QueueFrontier()
+
+        frontera.add(root)
         reached[root.state] = True
 
-        # Initialize frontier with the root node
-        # TODO Complete the rest!!
-        # ...
+        if grid.objective_test(root.state):
+            return Solution(root, reached)
+
+        while True:
+            if frontera.is_empty():
+                return NoSolution(reached)
+
+            n = frontera.remove()
+
+            for a in grid.actions(n.state):
+                s = grid.result(n.state, a)
+
+                if s not in reached:
+                    son = Node(
+                        "",
+                        state=s,
+                        cost=n.cost + grid.individual_cost(n.state, a),
+                        parent=n,
+                        action=a,
+                    )
+
+                    if grid.objective_test(s):
+                        return Solution(son, reached)
+
+                    reached[s] = True
+                    frontera.add(son)
 
         return NoSolution(reached)
